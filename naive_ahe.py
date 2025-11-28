@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 import skimage.io
 import numpy as np
 
-img_rgb = skimage.io.imread('dataset/225_low.png')
-
-img_ycbcr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCrCb)
-Y = img_ycbcr[:, :, 0]
 
 def he(image, L):
     hist, bins = np.histogram(image, bins=L, range=(0, L))
@@ -18,7 +14,7 @@ def he(image, L):
     image_eq = lut[image]
     return image_eq
 
-def grayscale_patches(image, patch_size):
+def extract_patches(image, patch_size):
     h, w = image.shape
     patches = []
 
@@ -48,12 +44,17 @@ def merge_patches(patches, image_shape, patch_size):
 
     return merged
 
-patch_size = 32
+def naive_he(image, L=256, patch_size=64):
+    patches, coords = extract_patches(image, patch_size)
+    he_patches = [he(p,L) for p in patches]
+    return merge_patches(he_patches, coords, image.shape, patch_size)
 
-patches = grayscale_patches(Y, patch_size)
-he_patches = [he(p,256) for p in patches]
+img_rgb = skimage.io.imread('dataset/225_low.png')
 
-ahe_image = merge_patches(he_patches, Y.shape, patch_size)
+img_ycbcr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCrCb)
+Y = img_ycbcr[:, :, 0]
+
+naive_ahe = naive_he(Y)
 
 plt.figure(figsize=(10, 5))
 
@@ -63,7 +64,7 @@ ax[0].imshow(Y, cmap='gray')
 ax[0].axis("off")
 ax[0].text(0.5, -0.05, "(a)", ha='center', va='top', transform=ax[0].transAxes, fontsize=14)
 
-ax[1].imshow(ahe_image, cmap='gray')
+ax[1].imshow(naive_he, cmap='gray')
 ax[1].axis("off")
 ax[1].text(0.5, -0.05, "(b)", ha='center', va='top', transform=ax[1].transAxes, fontsize=14)
 

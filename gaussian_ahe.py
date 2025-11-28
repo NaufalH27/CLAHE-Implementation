@@ -5,10 +5,6 @@ import numpy as np
 import skimage.io
 import matplotlib.pyplot as plt
 
-img_rgb = skimage.io.imread('dataset/225_low.png')
-img_ycbcr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCrCb)
-Y = img_ycbcr[:, :, 0]
-
 def he(image, L=256):
     hist, _ = np.histogram(image, bins=L, range=(0,L))
     cdf = np.cumsum(hist) / image.size
@@ -54,14 +50,15 @@ def gaussian_merge(patches, coords, img_shape, patch_size, overlap):
     return (result/weight_sum).astype(np.uint8)
 
 
-patch_size = 64
-overlap = 32  
+def gaussian_ahe(image, L=256, patch_size=64, overlap=32):
+    patches, coords = extract_patches(image, patch_size, overlap)
+    he_patches = [he(p,L) for p in patches]
+    return gaussian_merge(he_patches, coords, image.shape, patch_size, overlap)
 
-patches, coords = extract_patches(Y, patch_size, overlap)
-he_patches = [he(p,256) for p in patches]
+img_rgb = skimage.io.imread('dataset/225_low.png')
+img_ycbcr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2YCrCb)
+Y = img_ycbcr[:, :, 0]
 
-ahe_gaussian = gaussian_merge(he_patches, coords, Y.shape, patch_size, overlap)
-
-plt.imshow(ahe_gaussian, cmap="gray")
+plt.imshow(gaussian_ahe(Y), cmap="gray")
 plt.axis('off')
 plt.show()

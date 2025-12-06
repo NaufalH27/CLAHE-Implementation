@@ -1,7 +1,6 @@
 # CHALE-Implementation
-tugas pcd implementasi CHALE ke image low-light 
-download dataset : https://daooshee.github.io/BMVC2018website/
-setelah load extract dataset, jalankan:
+download dataset : https://daooshee.github.io/BMVC2018website/<br> <br>
+setelah extract dataset, jalankan:
 ```
 pip install requirements.txt
 ```
